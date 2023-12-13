@@ -44,6 +44,12 @@ while True:
 
         if face_match:
             cv2.putText(frame, "¡Welcome to the party!", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 3)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BAYER_BG2BGR)
+            faces = cv2.CascadeClassifier(cv2.data.haarcascades + 'haardcascade_frontalface_default.xml').detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30,30))
+
+            for (x,y,w,h) in faces:
+                cv2.rectangle(frame, (x,y), (x + w,y + h), (0,255,0),2)
+
         else:
             cv2.putText(frame, "Unidentified, please register", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255), 3)
         
