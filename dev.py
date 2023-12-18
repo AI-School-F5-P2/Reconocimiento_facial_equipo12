@@ -1,85 +1,109 @@
-import threading
-
 import cv2
+import tkinter as tk
+from tkinter import messagebox
+from PIL import Image, ImageTk
+import threading
+import numpy as np
 from deepface import DeepFace
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+class FaceDetectorApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Fiesta de fin de año Factoria 2023")
 
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.label = tk.Label(root, text="Fiesta de fin de año Factoria 2023")
+        self.label.pack(pady=10)
 
-counter = 0 
+        self.button = tk.Button(root, text="Acceder", command=self.start_face_detection)
+        self.button.pack(pady=10)
 
-face_match = False
-faces = []
-similarity = 0
+        self.cap = None
+        self.face_match = False
+        self.similarity = 0
 
-reference_img1 = cv2.imread("prueba1.jpg")
-reference_img2 = cv2.imread("prueba2.jpg")
+        # Inicialización del modelo de detección facial integrado
+        self.net = cv2.dnn.readNet(cv2.samples.findFile('res10_300x300_ssd_iter_140000.caffemodel'), 
+                                   cv2.samples.findFile('deploy.prototxt'))
 
-if reference_img1 is None or reference_img2 is None:
-    print("Error al cargar imágenes de referencia.")
-    exit()
+        # Cargar las imágenes de referencia
+        self.reference_img1 = cv2.imread("prueba1.jpg")
+        self.reference_img2 = cv2.imread("prueba2.jpg")
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-if face_cascade.empty():
-    print("Error al cargar el clasificador Haarcascades.")
+        if self.reference_img1 is None or self.reference_img2 is None:
+            messagebox.showerror("Error", "Error al cargar imágenes de referencia.")
+            root.destroy()
+            return
 
-def check_face(frame):
-    global face_match, faces, similarity
-    try:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    def start_face_detection(self):
+        self.label.pack_forget()
+        self.button.pack_forget()
 
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 500)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 200)
 
-        print("Número de caras detectadas:", len(faces))
+        threading.Thread(target=self.video_stream, daemon=True).start()
 
-        if len(faces) > 0:
-            # Tomar la primera cara detectada para la verificación
-            x, y, w, h = faces[0]
-            face_roi = frame[y:y + h, x:x + w]
+    def check_face(self, frame):
+        try:
+            blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), [104, 117, 123], swapRB=True, crop=False)
+            self.net.setInput(blob)
+            detections = self.net.forward()
 
-            similarity1 = DeepFace.verify(face_roi, reference_img1.copy())['verified']
-            similarity2 = DeepFace.verify(face_roi, reference_img2.copy())['verified']
+            for i in range(detections.shape[2]):
+                confidence = detections[0, 0, i, 2]
+                if confidence > 0.5:
+                    box = detections[0, 0, i, 3:7] * np.array([frame.shape[1], frame.shape[0], frame.shape[1], frame.shape[0]])
+                    (x, y, w, h) = box.astype("int")
+                    face_roi = frame[y:y + h, x:x + w]
 
-            # Si alguna de las imágenes coincide, considera que hay una coincidencia
-            face_match = similarity1 or similarity2
-            similarity = max(similarity1, similarity2)
+                    similarity1 = DeepFace.verify(face_roi, self.reference_img1.copy())['verified']
+                    similarity2 = DeepFace.verify(face_roi, self.reference_img2.copy())['verified']
 
-    except ValueError:
-        face_match = False
+                    self.face_match = similarity1 or similarity2
+                    self.similarity = max(similarity1, similarity2)
 
-while True:
-    ret, frame = cap.read()
+                    self.draw_bounding_box(frame, (x, y, w, h))
+                    self.draw_result_text(frame, (x, y, w, h))
 
-    if not ret:
-        print("Error al leer el frame de la cámara.")
+        except ValueError:
+            self.face_match = False
 
-    if ret:
-        if counter % 30 == 0:
-            try:
-                threading.Thread(target=check_face, args=(frame.copy(),)).start()
-            except ValueError:
-                pass
-        counter += 1
+    def video_stream(self):
+        _, frame = self.cap.read()
 
-        # Dibujar el cuadro de enfoque alrededor de las caras (independientemente de la coincidencia de cara)
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            if face_match:
-                similarity_text = f"Similarity: {int(similarity * 100)}%"
-                cv2.putText(frame, similarity_text, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        if frame is not None:
+            self.check_face(frame)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(frame)
+            img = ImageTk.PhotoImage(img)
 
-                cv2.putText(frame, "¡Welcome to the party!", (x, y + h + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            if not hasattr(self, 'panel'):
+                self.panel = tk.Label(self.root, image=img)
+                self.panel.image = img
+                self.panel.pack(side="top", padx=10, pady=10)
             else:
-                cv2.putText(frame, "Unidentified, please register", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        
-        cv2.imshow("video", frame)
-        cv2.waitKey(1)
+                self.panel.configure(image=img)
+                self.panel.image = img
 
-    key = cv2.waitKey(1)
-    if key == ord("q"):
-        break
+            self.root.after(10, self.video_stream)  # Reemplaza cv2.waitKey(1)
 
-cv2.destroyAllWindows()
-cap.release()
+    def draw_bounding_box(self, frame, face_coordinates):
+        x, y, w, h = face_coordinates
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    def draw_result_text(self, frame, face_coordinates):
+        x, y, w, h = face_coordinates
+        if self.face_match:
+            result_text = "¡Bienvenido a la fiesta!"
+            similarity_text = f"Similarity: {int(self.similarity * 100)}%"
+            cv2.putText(frame, result_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(frame, similarity_text, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        else:
+            result_text = "No identificado, por favor regístrese"
+            cv2.putText(frame, result_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FaceDetectorApp(root)
+    root.mainloop()
