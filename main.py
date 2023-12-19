@@ -1,8 +1,10 @@
+import tensorflow as tf
 import cv2
 import streamlit as st
 import base64
 import threading
 from deepface import DeepFace
+
 
 @st.cache_data
 def get_img_as_base64(file):
