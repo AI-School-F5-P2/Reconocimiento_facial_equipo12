@@ -13,7 +13,8 @@ Este proyecto es la culminación de la innovación tecnológica que busca simpli
 - Reconocimiento multicara.
 - Sin Datos Externos: Todos los datos utilizados para el entrenamiento del modelo son generados internamente, sin depender de fuentes externas.  
 - Despliegue en Ordenador Portátil: El modelo y los datos se ejecutan localmente en un ordenador portátil, garantizando la privacidad de los datos.  
-- Interfaz amigable.
+- Interfaz amigable. ![no se ve](reconocidos.png)
+
 # Instrucciones de instalación
 A continuación, se detallan los pasos para instalar y ejecutar el proyecto en tu ordenador portátil. 
 1. Clonar el repositorio:
