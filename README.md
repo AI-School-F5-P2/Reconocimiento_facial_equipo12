@@ -1,8 +1,7 @@
 # Proyecto computer vision: Aplicación de reconocimiento facial
 ## Descripción del proyecto
-Este proyecto es la culminación de la innovación tecnológica que busca simplificar y acelerar el proceso de entrada a eventos, en particular, la próxima gran fiesta organizada por factoria F5. La visión es permitir que los empleados disfruten de un acceso fluido y sin complicaciones simplemente acercándose a un portátil habilitado con nuestro sistema de reconocimiento facial basado en deep learning. La inteligencia artificial se encargará de identificar y verificar la identidad de los empleados en tiempo real, proporcionando una experiencia de entrada eficiente y segura.
+Este proyecto es la culminación de la innovación tecnológica que busca simplificar y acelerar el proceso de entrada a eventos, en particular, la próxima gran fiesta organizada por factoria F5. La visión es permitir que los empleados disfruten de un acceso fluido y sin complicaciones simplemente acercándose a un portátil habilitado con nuestro sistema de reconocimiento facial basado en deep learning. La inteligencia artificial se encargará de identificar y verificar la identidad de los empleados en tiempo real, proporcionando una experiencia de entrada eficiente y segura.![no se ve](fiesta.png)
 
-![no se ve]("fiesta.png")
 ## Tecnologías utilizadas
 - python
 - face_recognition
