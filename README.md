@@ -4,7 +4,8 @@
 Este proyecto es la culminación de la innovación tecnológica que busca simplificar y acelerar el proceso de entrada a eventos, en particular, la próxima gran fiesta organizada por factoria F5. La visión es permitir que los empleados disfruten de un acceso fluido y sin complicaciones simplemente acercándose a un portátil habilitado con nuestro sistema de reconocimiento facial basado en deep learning. La inteligencia artificial se encargará de identificar y verificar la identidad de los empleados en tiempo real, proporcionando una experiencia de entrada eficiente y segura.![no se ve](fiesta.png)
 
 ## Tecnologías utilizadas
-- python
+- python 3.7, 3.8, 3.9 con dlib 19.22   
+ (si utilizas python 3.10 utiliza la rueda de dlib pip install https://github.com/jloh02/dlib/releases/download/v19.22/dlib-19.22.99-cp310-cp310-win_amd64.whl)
 - face_recognition
 - streamlit
 ## Características principales
@@ -53,8 +54,7 @@ Una vez que el PR haya sido revisado y aprobado, se realizará el merge a la ram
 # Contacto
 Miguel Mendoza
 
-Verónica Bermejo Gómez   vero_bermejo@hotmail.com  
-
+Verónica Bermejo Gómez:   vero_bermejo@hotmail.com  
 https://www.linkedin.com/in/ver%C3%B3nica-bermejo-g%C3%B3mez/
 
 
